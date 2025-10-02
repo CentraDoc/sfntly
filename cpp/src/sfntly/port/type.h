@@ -78,4 +78,10 @@ inline To down_cast(From* f) {                   // so we only accept pointers
   #define UNREFERENCED_PARAMETER(p) do { (void)p; } while (0)
 #endif
 
+#ifdef _WINDOWS
+#ifdef max
+#undef max
+#endif
+#endif
+
 #endif  // SFNTLY_CPP_SRC_SFNTLY_PORT_TYPE_H_
