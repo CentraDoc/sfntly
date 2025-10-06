@@ -21,24 +21,47 @@
 
 #include <windows.h>
 
-static inline size_t AtomicIncrement(size_t* address) {
+
 #if defined (_WIN64)
-  return InterlockedIncrement64(reinterpret_cast<LONGLONG*>(address));
+  typedef LONGLONG atomic_count;
 #else
-  return InterlockedIncrement(reinterpret_cast<LONG*>(address));
+  typedef LONG atomic_count;
+#endif
+
+static inline size_t AtomicIncrement(atomic_count* address) {
+#if defined (_WIN64)
+  return InterlockedIncrement64(address);
+#else
+  return InterlockedIncrement(address);
 #endif
 }
 
-static inline size_t AtomicDecrement(size_t* address) {
+static inline size_t AtomicDecrement(atomic_count* address) {
 #if defined (_WIN64)
-  return InterlockedDecrement64(reinterpret_cast<LONGLONG*>(address));
+  return InterlockedDecrement64(address);
 #else
-  return InterlockedDecrement(reinterpret_cast<LONG*>(address));
+  return InterlockedDecrement(address);
 #endif
 }
 
 #elif defined (__APPLE__)
+#include <atomic>
 
+#if __SIZEOF_POINTER__ == 8
+  typedef std::atomic_llong atomic_count;
+#else
+  typedef std::atomic_int atomic_count;
+#endif
+
+static inline size_t AtomicIncrement(atomic_count* address) {
+  return std::atomic_fetch_add(address, 1) + 1;  /* NEW VALUE */
+}
+
+static inline size_t AtomicDecrement(atomic_count* address) {
+  return std::atomic_fetch_sub(address, 1) - 1;  /* NEW VALUE */
+}
+
+/* DEPRECATED
 #include <libkern/OSAtomic.h>
 
 static inline size_t AtomicIncrement(size_t* address) {
@@ -48,6 +71,7 @@ static inline size_t AtomicIncrement(size_t* address) {
 static inline size_t AtomicDecrement(size_t* address) {
   return OSAtomicDecrement32Barrier(reinterpret_cast<int32_t*>(address));
 }
+*/
 
 // Originally we check __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4, however, there are
 // issues that clang not carring over this definition.  Therefore we boldly
@@ -57,6 +81,8 @@ static inline size_t AtomicDecrement(size_t* address) {
 #else
 
 #include <stddef.h>
+
+typedef size_t atomic_count;
 
 static inline size_t AtomicIncrement(size_t* address) {
   return __sync_add_and_fetch(address, 1);

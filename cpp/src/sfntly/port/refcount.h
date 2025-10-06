@@ -67,7 +67,7 @@
 #define SFNTLY_CPP_SRC_SFNTLY_PORT_REFCOUNT_H_
 
 #if !defined (NDEBUG)
-  #define ENABLE_OBJECT_COUNTER
+  //  #define ENABLE_OBJECT_COUNTER
 //  #define REF_COUNT_DEBUGGING
 #endif
 
@@ -158,18 +158,18 @@ class RefCounted : virtual public RefCount {
     return new_ref_count;
   }
 
-  mutable size_t ref_count_;  // reference count of current object
+  mutable atomic_count ref_count_;  // reference count of current object
   friend bool ::TestSmartPointer();
 #if defined (ENABLE_OBJECT_COUNTER)
-  static size_t object_counter_;
-  static size_t next_id_;
-  mutable size_t object_id_;
+  static atomic_count object_counter_;
+  static atomic_count next_id_;
+  mutable atomic_count object_id_;
 #endif
 };
 
 #if defined (ENABLE_OBJECT_COUNTER)
-template <typename TDerived> size_t RefCounted<TDerived>::object_counter_ = 0;
-template <typename TDerived> size_t RefCounted<TDerived>::next_id_ = 0;
+template <typename TDerived> atomic_count RefCounted<TDerived>::object_counter_ = 0;
+template <typename TDerived> atomic_count RefCounted<TDerived>::next_id_ = 0;
 #endif
 
 // semi-smart pointer for RefCount derived objects, similar to CComPtr
