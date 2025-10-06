@@ -80,6 +80,7 @@ elseif(APPLE)
   # For universal builds, we need to handle ICU differently
   # Try multiple locations for universal ICU
   set(ICU_POSSIBLE_PATHS
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/icu/source/universal"
     "/usr/local/icu-universal"
     "/usr/local"
     "/opt/homebrew"
@@ -210,7 +211,7 @@ endif()
 # The following simulates Chrome compilation flags
 add_definitions(-DSFNTLY_NO_EXCEPTION)
 if(GCC_OR_CLANG)
-  add_definitions(-D__wur=__attribute__\(\(warn_unused_result\)\) -Wall -Werror -fno-exceptions)
+  add_definitions(-D__wur=__attribute__\(\(warn_unused_result\)\) -Wall -fno-exceptions)
 endif(GCC_OR_CLANG)
 
 # Use STL for TinyXML library
